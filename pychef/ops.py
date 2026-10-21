@@ -3,7 +3,6 @@ import re
 import string
 from itertools import cycle
 
-
 def _to_key(key: bytes | str | int) -> bytes:
     # Accept 0x13, "secret" or b"\x13" as a key
     if isinstance(key, int):
@@ -12,30 +11,29 @@ def _to_key(key: bytes | str | int) -> bytes:
         return key.encode()
     return bytes(key)
 
-
+# XOR
 def xor(data: bytes, key: bytes | str | int) -> bytes:
     # Pairs bytes with zip and repeats the key as needed
     return bytes(b1 ^ b2 for b1, b2 in zip(data, cycle(_to_key(key))))
-
-
+    
+# Convert to base64
 def to_base64(data: bytes) -> bytes:
     return base64.b64encode(data)
-
-
+    
+# Convert from base64 to bytes
 def from_base64(data: bytes) -> bytes:
     return base64.b64decode(data)
 
-
+# Remove all whitespace
 def clean(data: bytes) -> bytes:
     # Removes all whitespace
     return b"".join(data.split())
-
 
 _HEX_PREFIX = re.compile(rb"0x|\\x", re.IGNORECASE)
 _SEPARATORS = re.compile(rb"[\s,:;-]+")
 _HEX_TOKEN = re.compile(rb"[0-9a-fA-F]+")
 
-
+# Convert from hex (generic format) to bytes
 def from_hex(data: bytes) -> bytes:
     # Turn 0x / \x prefixes into separators, then parse each token
     data = _HEX_PREFIX.sub(b" ", data)
@@ -50,11 +48,11 @@ def from_hex(data: bytes) -> bytes:
         out += bytes.fromhex(token.decode())
     return bytes(out)
 
-
+# Convert bytes to hex
 def to_hex(data: bytes) -> bytes:
     return data.hex().encode()
 
-
+# Map unicode characters to ascii characters, given a characters set
 def u_shift(data: bytes, charset: str = string.ascii_letters, keep: str = string.whitespace) -> bytes:
     # Map each unique symbol to a letter from charset, in order of first appearance.
     # Characters in `keep` (whitespace by default) are left as they are.
